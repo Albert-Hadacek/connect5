@@ -1,23 +1,5 @@
-import React, { createContext, useReducer } from 'react'
-
-type Player = 1 | 2
-
-interface HistoryEntry {
-  x: number
-  y: number
-  player: Player
-}
-
-interface InitialState {
-  player: Player
-  board: number[][]
-  history: HistoryEntry[]
-  isFinished: boolean
-  winner: null | 1 | 2
-  time: number
-  timeBanks1: number
-  timeBanks2: number
-}
+import React, { createContext, useReducer, useContext, Dispatch } from 'react'
+import mainReducer from './reducer'
 
 const initialState: InitialState = {
   player: 1,
@@ -30,11 +12,21 @@ const initialState: InitialState = {
   timeBanks2: 3,
 }
 
-const StateContext = createContext<InitialState>(initialState)
+const StoreContext = createContext<{
+  state: InitialState
+  dispatch: Dispatch<Action>
+}>({ state: initialState, dispatch: () => null })
 
 
-const StateContextProvider = () => {
-  const [dispatch, state] = useReducer()
+const StoreContextProvider: React.FC = ({ children }) => {
+  const [state, dispatch] = useReducer(mainReducer, initialState)
+  return (
+    <StoreContext.Provider value={{ state, dispatch }}>
+      {children}
+    </StoreContext.Provider>
+  )
 }
 
-export default StateContext
+export const useStore = () => useContext(StoreContext)
+
+export default StoreContextProvider
